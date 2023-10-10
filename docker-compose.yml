@@ -1,0 +1,34 @@
+version: '3'
+services:
+  etl:
+    build: ./etl
+    container_name: etl
+    env_file:
+      - .env
+    depends_on:
+      - elastic
+      - db
+
+  db:
+    image: postgres:13
+    container_name: db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    env_file:
+      - .env
+    restart: always
+
+  elastic:
+    image: elasticsearch:8.6.2
+    container_name: elastic
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+    restart: always
+
+  redis:
+    image: redis:alpine
+    container_name: redis_storage
+
+volumes:
+  postgres_data:
