@@ -30,30 +30,26 @@ class Extractor:
         поэтому мы можем пропустить их
         """
         with postgresql_connection(self.database_config.dict()) as pg_conn:
-            cur = pg_conn.cursor()
-            filmworks_to_update = []
-            filmworks_to_update.extend(self._extract_filmworks(extract_timestamp, cur))
-            filmworks_to_update.extend(self._extract_filmworks_by_persons(extract_timestamp, cur))
-            filmworks_to_update.extend(self._extract_filmworks_by_genres(extract_timestamp, cur))
-            filmworks_to_update = list(set(filmworks_to_update))
-            filmworks_to_update = tuple(set(filmworks_to_update) - set(to_skip_list))
+            with pg_conn.cursor() as curs:
+                filmworks_to_update = []
+                filmworks_to_update.extend(self._extract_filmworks(extract_timestamp, curs))
+                filmworks_to_update.extend(self._extract_filmworks_by_persons(extract_timestamp, curs))
+                filmworks_to_update.extend(self._extract_filmworks_by_genres(extract_timestamp, curs))
+                filmworks_to_update = list(set(filmworks_to_update))
+                filmworks_to_update = tuple(set(filmworks_to_update) - set(to_skip_list))
 
-            if not filmworks_to_update:
-                logger.info('No data to update')
-                return
+                if not filmworks_to_update:
+                    logger.info('No data to update')
+                    return
 
-            sql = SQL_FILMWORD_DATA
-            cur.execute(sql, [filmworks_to_update])
-            count = 0
-            while True:
-                count += self.chunk_size
-                logger.info(f'{count}/{len(filmworks_to_update)}')
-                rows = cur.fetchmany(self.chunk_size)
-                columns = [col[0] for col in cur.description]
-                if not rows:
-                    cur.close()
-                    break
-                yield [dict(zip(columns, row)) for row in rows]
+                sql = SQL_FILMWORD_DATA
+                curs.execute(sql, [filmworks_to_update])
+                count = 0
+                while rows := curs.fetchmany(self.chunk_size):
+                    count += self.chunk_size
+                    logger.info(f'{count}/{len(filmworks_to_update)}')
+                    columns = [col[0] for col in curs.description]
+                    yield [dict(zip(columns, row)) for row in rows]
 
     @staticmethod
     def _extract_filmworks(date, cursor):
