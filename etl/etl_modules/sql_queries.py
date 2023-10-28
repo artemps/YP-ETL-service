@@ -9,7 +9,8 @@ SQL_FILMWORD_DATA = """
         json_agg(DISTINCT p.full_name) FILTER (WHERE pfw.role = 'actor') as actors_names,
         json_agg(DISTINCT p.full_name) FILTER (WHERE pfw.role = 'writer') as writers_names,
         json_agg(DISTINCT jsonb_build_object('id', p.id, 'name', p.full_name)) FILTER (WHERE pfw.role = 'actor') as actors,
-        json_agg(DISTINCT jsonb_build_object('id', p.id, 'name', p.full_name)) FILTER (WHERE pfw.role = 'writer') as writers
+        json_agg(DISTINCT jsonb_build_object('id', p.id, 'name', p.full_name)) FILTER (WHERE pfw.role = 'writer') as writers,
+        json_agg(DISTINCT jsonb_build_object('id', p.id, 'name', p.full_name)) FILTER (WHERE pfw.role = 'director') as directors
     FROM "content".film_work as fw
     LEFT JOIN "content".genre_film_work gfw on gfw.film_work_id = fw.id
     LEFT JOIN "content".genre g on g.id = gfw.genre_id
@@ -39,4 +40,9 @@ SQL_FILMWORK_IDS_BY_GENRES = """
     LEFT JOIN content.genre_film_work as gfw
     ON g.id = gfw.genre_id
     {filter}
+"""
+
+SQL_GENRES_DATA = """
+    SELECT *
+    FROM "content".genre
 """

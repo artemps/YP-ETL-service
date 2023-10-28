@@ -6,7 +6,8 @@ from utils.config import DataBaseConfig
 from utils.connection import postgresql_connection
 from .sql_queries import (
     SQL_FILMWORD_DATA, SQL_FILMWORK_IDS,
-    SQL_FILMWORK_IDS_BY_PERSONS, SQL_FILMWORK_IDS_BY_GENRES
+    SQL_FILMWORK_IDS_BY_PERSONS, SQL_FILMWORK_IDS_BY_GENRES,
+    SQL_GENRES_DATA
 )
 
 logger = logging.getLogger(__name__)
@@ -48,6 +49,18 @@ class Extractor:
                 while rows := curs.fetchmany(self.chunk_size):
                     count += self.chunk_size
                     logger.info(f'{count}/{len(filmworks_to_update)}')
+                    columns = [col[0] for col in curs.description]
+                    yield [dict(zip(columns, row)) for row in rows]
+
+    def extract_genres(self) -> Generator:
+        """
+        Метод позволяет чанками извлекать жанры для обновления
+        """
+        with postgresql_connection(self.database_config.dict()) as pg_conn:
+            with pg_conn.cursor() as curs:
+                sql = SQL_GENRES_DATA
+                curs.execute(sql)
+                while rows := curs.fetchmany(self.chunk_size):
                     columns = [col[0] for col in curs.description]
                     yield [dict(zip(columns, row)) for row in rows]
 

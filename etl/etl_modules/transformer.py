@@ -1,4 +1,4 @@
-from utils.config import ESFilmWork
+from utils.config import ESFilmWork, ESGenre
 
 
 class Transformer:
@@ -18,7 +18,20 @@ class Transformer:
                 writers_names=record['writers_names'] or [],
                 actors=record['actors'] or [],
                 writers=record['writers'] or [],
+                directors=record['directors'] or [],
             )
             transformed_filmworks.append(filmwork)
 
         return transformed_filmworks
+
+    def transform_genres(self, extracted_genres: dict) -> list[ESGenre]:
+        transformed_genres = []
+        for record in extracted_genres:
+            genre = ESGenre(
+                id=record['id'],
+                name=record['name'],
+                description=record['description'],
+            )
+            transformed_genres.append(genre)
+
+        return transformed_genres

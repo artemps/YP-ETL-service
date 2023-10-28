@@ -47,6 +47,10 @@ def run_etl(extractor: Extractor, transformer: Transformer, loader: Loader, stat
     state_storage.set_state('completed_ids', [])
     state_storage.set_state('is_running', False)
 
+    for data in extractor.extract_genres():
+        transformed_data = transformer.transform_genres(data)
+        loader.load_genres(transformed_data)
+
 
 if __name__ == '__main__':
     app_config = AppConfig()

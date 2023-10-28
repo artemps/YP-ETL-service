@@ -23,7 +23,8 @@ class DataBaseConfig(BaseSettings):
 class ElasticConfig(BaseSettings):
     elastic_host: str = Field('localhost', env='ELASTIC_HOST')
     elastic_port: str = Field(9200, env='ELASTIC_PORT')
-    index: str = Field('default', env='ELASTIC_INDEX')
+    movies_index: str = Field('default', env='ELASTIC_MOVIES_INDEX')
+    genres_index: str = Field('default', env='ELASTIC_GENRES_INDEX')
 
     def get_elastic_url(self):
         return 'http://{}:{}'.format(self.elastic_host, self.elastic_port)
@@ -54,3 +55,10 @@ class ESFilmWork(BaseModel):
     writers_names: list[str]
     actors: list[ESPerson]
     writers: list[ESPerson]
+    directors: list[ESPerson]
+
+
+class ESGenre(BaseModel):
+    id: str
+    name: str
+    description: str
